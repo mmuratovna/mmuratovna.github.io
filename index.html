@@ -4,26 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Семейный Бюджет · Риск и Прибыль</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ========== СТИЛИ ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        #app {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Экраны */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .container {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+            padding: 3rem;
+            text-align: center;
+        }
+
+        /* Кнопки */
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+            margin: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-outline:hover {
+            border-color: #2563eb;
+            background: #f8fafc;
+        }
+
+        /* Главное меню */
+        .game-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-subtitle {
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 2.5rem;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        /* Настройки */
+        .settings-form {
+            max-width: 400px;
+            margin: 2rem auto;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+
+        /* Игровой экран */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .round-info {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .round-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .net-worth-card {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.03);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .budget-panel, .event-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.03);
+        }
+
+        .budget-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .budget-row input[type="range"] {
+            width: 120px;
+        }
+
+        .phase-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .phase {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            background: #f1f5f9;
+            border-radius: 12px;
+            color: #64748b;
+        }
+
+        .phase.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .event-value.positive { color: #059669; }
+        .event-value.negative { color: #dc2626; }
+
+        .final-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .final-stat-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .game-grid { grid-template-columns: 1fr; }
+            .container { padding: 1.5rem; }
+        }
+    </style>
 </head>
 <body>
     <div id="app">
-        <!-- Главное меню -->
+        <!-- ========== ГЛАВНОЕ МЕНЮ ========== -->
         <div id="main-menu" class="screen active">
             <div class="container">
                 <h1 class="game-title">💰 Семейный Бюджет</h1>
                 <p class="game-subtitle">Риск и Прибыль</p>
                 <div class="menu-buttons">
                     <button id="new-game-btn" class="btn btn-primary">🎮 Новая игра</button>
-                    <button id="continue-game-btn" class="btn btn-secondary">⏯ Продолжить игру</button>
+                    <button id="continue-game-btn" class="btn btn-secondary">⏯ Продолжить</button>
                     <button id="rules-btn" class="btn btn-outline">📖 Правила</button>
                     <button id="settings-btn" class="btn btn-outline">⚙️ Настройки</button>
                 </div>
             </div>
         </div>
 
-        <!-- Экран настроек -->
+        <!-- ========== НАСТРОЙКИ ========== -->
         <div id="settings-screen" class="screen">
             <div class="container">
                 <h2>⚙️ Настройки игры</h2>
@@ -52,45 +322,42 @@
             </div>
         </div>
 
-        <!-- Экран правил -->
+        <!-- ========== ПРАВИЛА ========== -->
         <div id="rules-screen" class="screen">
             <div class="container">
                 <h2>📖 Правила игры</h2>
-                <div class="rules-content">
+                <div style="text-align: left; margin: 2rem 0;">
                     <h3>Цель игры</h3>
-                    <p>Управлять семейным бюджетом на протяжении 12–16 месяцев, накапливать сбережения и достигать финансовых целей.</p>
+                    <p>Управлять семейным бюджетом, накапливать сбережения и достигать финансовых целей.</p>
                     
-                    <h3>Основные механики</h3>
-                    <ul>
+                    <h3 style="margin-top: 1.5rem;">Как играть</h3>
+                    <ul style="margin-left: 1.5rem;">
                         <li>Каждый раунд = 1 месяц</li>
-                        <li>Получайте доход, оплачивайте расходы</li>
-                        <li>Принимайте решения по неожиданным событиям</li>
+                        <li>Проходите 5 фаз: Доходы → Расходы → Событие → Решение → Итог</li>
+                        <li>Регулируйте расходы слайдерами</li>
+                        <li>Принимайте решения по событиям</li>
                         <li>Инвестируйте и берите кредиты</li>
-                        <li>Следите за чистой стоимостью</li>
                     </ul>
-                    
-                    <h3>Победа</h3>
-                    <p>Игра завершается после N раундов. Побеждает игрок с наибольшей чистой стоимостью и выполненными целями.</p>
                 </div>
                 <button id="back-from-rules" class="btn btn-outline">В меню</button>
             </div>
         </div>
 
-        <!-- Игровой экран -->
+        <!-- ========== ИГРОВОЙ ЭКРАН ========== -->
         <div id="game-screen" class="screen">
             <div class="game-header">
                 <div class="round-info">
                     <span class="round-label">Месяц</span>
                     <span class="round-value" id="current-round">1</span>
-                    <span class="round-max" id="max-rounds">/12</span>
+                    <span id="max-rounds">/12</span>
                 </div>
                 <div class="net-worth-card">
                     <span>💰 Чистая стоимость</span>
-                    <span class="net-worth-value" id="net-worth">5 000 ₸</span>
+                    <span style="font-size: 1.75rem; font-weight: 700;" id="net-worth">5 000 ₸</span>
                 </div>
             </div>
 
-            <!-- Панель статистики -->
+            <!-- Статистика -->
             <div class="stats-panel">
                 <div class="stat-item">
                     <span class="stat-label">💵 Деньги</span>
@@ -108,56 +375,44 @@
                     <span class="stat-label">💳 Долги</span>
                     <span class="stat-value" id="stat-debts">0</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">😊 Удовлетворённость</span>
-                    <span class="stat-value" id="stat-satisfaction">50%</span>
-                </div>
             </div>
 
-            <!-- График роста капитала -->
-            <div class="chart-container">
-                <canvas id="wealth-chart"></canvas>
-            </div>
-
+            <!-- Основная сетка -->
             <div class="game-grid">
-                <!-- Таблица бюджета -->
+                <!-- Бюджет -->
                 <div class="budget-panel">
                     <h3>📊 Бюджет месяца</h3>
-                    <div class="budget-categories" id="budget-categories">
-                        <!-- Динамически через JS -->
-                    </div>
-                    <div class="budget-summary">
-                        <div class="summary-row">
+                    <div id="budget-categories"></div>
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between;">
                             <span>Доход:</span>
                             <span id="total-income">9 200 ₸</span>
                         </div>
-                        <div class="summary-row">
+                        <div style="display: flex; justify-content: space-between;">
                             <span>Расходы:</span>
                             <span id="total-expenses">6 300 ₸</span>
                         </div>
-                        <div class="summary-row highlight">
+                        <div style="display: flex; justify-content: space-between; font-weight: 700; color: #2563eb;">
                             <span>Баланс:</span>
                             <span id="balance">2 900 ₸</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Карточка события -->
-                <div id="event-card" class="event-card">
-                    <div class="event-header">
-                        <span class="event-badge">📌 СОБЫТИЕ</span>
+                <!-- Событие -->
+                <div class="event-card" id="event-card">
+                    <div style="background: #fef3c7; color: #92400e; display: inline-block; padding: 0.25rem 1rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;">
+                        📌 СОБЫТИЕ
                     </div>
-                    <div class="event-content">
-                        <h4 id="event-title">Загрузка...</h4>
-                        <p id="event-description">Ожидайте событие</p>
-                        <div class="event-value" id="event-value"></div>
-                    </div>
-                    <div class="event-actions" id="event-actions"></div>
+                    <h4 id="event-title" style="font-size: 1.25rem; margin-bottom: 0.5rem;">Загрузка...</h4>
+                    <p id="event-description" style="color: #64748b; margin-bottom: 1rem;"></p>
+                    <div id="event-value" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;"></div>
+                    <div id="event-actions"></div>
                 </div>
             </div>
 
-            <!-- Фазы раунда -->
-            <div class="phase-panel">
+            <!-- Фазы -->
+            <div style="background: white; padding: 1.5rem; border-radius: 20px; margin: 1.5rem 0;">
                 <div class="phase-indicator">
                     <div class="phase active" id="phase-income">💰 Доходы</div>
                     <div class="phase" id="phase-expenses">📉 Расходы</div>
@@ -165,58 +420,477 @@
                     <div class="phase" id="phase-decision">🤔 Решение</div>
                     <div class="phase" id="phase-result">📊 Итог</div>
                 </div>
-                
-                <div class="phase-content" id="phase-content">
-                    <!-- Динамическое содержимое фаз -->
+                <div id="phase-content" style="padding: 1rem 0;">
+                    <h4>💰 Получение дохода</h4>
+                    <p>Основной доход: 9 200 ₸</p>
                 </div>
             </div>
 
             <!-- Кнопки управления -->
-            <div class="game-controls">
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button id="next-phase-btn" class="btn btn-primary">Следующая фаза →</button>
                 <button id="save-game-btn" class="btn btn-outline">💾 Сохранить</button>
                 <button id="menu-from-game-btn" class="btn btn-outline">Меню</button>
             </div>
         </div>
 
-        <!-- Модальное окно события -->
-        <div id="event-modal" class="modal">
-            <div class="modal-content">
-                <h3 id="modal-title">🔔 Событие!</h3>
-                <p id="modal-description"></p>
-                <div id="modal-actions"></div>
-            </div>
-        </div>
-
-        <!-- Финальный экран -->
+        <!-- ========== ФИНАЛЬНЫЙ ЭКРАН ========== -->
         <div id="final-screen" class="screen">
             <div class="container">
-                <h2>🏆 Игра завершена!</h2>
+                <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">🏆 Игра завершена!</h2>
                 <div class="final-stats">
                     <div class="final-stat-card">
-                        <span class="final-label">Чистая стоимость</span>
-                        <span class="final-value" id="final-networth">0 ₸</span>
+                        <span style="color: #64748b;">Чистая стоимость</span>
+                        <span style="font-size: 1.75rem; font-weight: 700; display: block;" id="final-networth">0 ₸</span>
                     </div>
                     <div class="final-stat-card">
-                        <span class="final-label">Выполнено целей</span>
-                        <span class="final-value" id="final-goals">0/4</span>
+                        <span style="color: #64748b;">Выполнено целей</span>
+                        <span style="font-size: 1.75rem; font-weight: 700; display: block;" id="final-goals">0/4</span>
                     </div>
                     <div class="final-stat-card">
-                        <span class="final-label">Фин. устойчивость</span>
-                        <span class="final-value" id="final-stability">B</span>
+                        <span style="color: #64748b;">Рейтинг</span>
+                        <span style="font-size: 1.75rem; font-weight: 700; display: block;" id="final-rating">B</span>
                     </div>
                 </div>
-                <div id="final-rating" class="final-rating"></div>
-                <div class="final-actions">
+                <div style="margin-top: 2rem;">
                     <button id="new-game-final" class="btn btn-primary">Новая игра</button>
-                    <button id="export-pdf" class="btn btn-outline">📄 Экспорт PDF</button>
+                    <button id="export-pdf" class="btn btn-outline">📄 Экспорт</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="js/data.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/game.js"></script>
+    <script>
+        // ========== ДАННЫЕ ==========
+        const INITIAL_PLAYER = {
+            money: 5000,
+            savings: 0,
+            debts: 0,
+            investments: 0,
+            income: 9200,
+            expenses: {
+                housing: 2300,
+                food: 1800,
+                transport: 700,
+                utilities: 800,
+                education: 900,
+                healthcare: 400,
+                entertainment: 600,
+                savings: 1000,
+                debtPayment: 0
+            },
+            satisfaction: 50,
+            netWorthHistory: [5000],
+            goals: {
+                home: { current: 0, target: 30000, completed: false },
+                vacation: { current: 0, target: 15000, completed: false },
+                education: { current: 0, target: 20000, completed: false },
+                emergency: { current: 0, target: 15000, completed: false }
+            }
+        };
+
+        const EVENT_DECK = [
+            { type: 'expense', value: -6000, text: '🔧 Ремонт автомобиля', description: 'Поломка двигателя — срочный ремонт' },
+            { type: 'expense', value: -4500, text: '🏥 Лекарства', description: 'Сезонная простуда, нужны лекарства' },
+            { type: 'income', value: 8000, text: '💼 Квартальная премия', description: 'Руководство отметило вашу работу' },
+            { type: 'income', value: 5000, text: '🎁 Подарок', description: 'Неожиданный денежный перевод' },
+            { type: 'expense', value: -3500, text: '❄️ Прорвало трубу', description: 'Коммунальная авария' },
+            { type: 'opportunity', value: -10000, text: '📈 Инвестиция', description: 'Друг предлагает войти в бизнес' },
+            { type: 'crisis', value: -0.2, text: '⚡ Сокращение', description: 'Доход временно снижен на 20%' },
+            { type: 'income', value: 3000, text: '🖥 Фриланс', description: 'Выполнили заказ в выходные' }
+        ];
+
+        // ========== ОСНОВНОЙ КЛАСС ИГРЫ ==========
+        class FamilyBudgetGame {
+            constructor() {
+                this.player = JSON.parse(JSON.stringify(INITIAL_PLAYER));
+                this.settings = {
+                    playersCount: 2,
+                    roundsCount: 12,
+                    difficulty: 'medium'
+                };
+                this.currentRound = 1;
+                this.currentPhase = 'income';
+                this.currentEvent = null;
+                
+                this.init();
+            }
+
+            init() {
+                // Назначаем обработчики событий
+                this.initEventListeners();
+                
+                // Обновляем UI
+                this.updateUI();
+                
+                // Показываем главное меню
+                this.showScreen('main-menu');
+            }
+
+            initEventListeners() {
+                // Главное меню
+                document.getElementById('new-game-btn').onclick = () => this.startNewGame();
+                document.getElementById('continue-game-btn').onclick = () => this.loadGame();
+                document.getElementById('rules-btn').onclick = () => this.showScreen('rules-screen');
+                document.getElementById('settings-btn').onclick = () => this.showScreen('settings-screen');
+                
+                // Настройки
+                document.getElementById('save-settings-btn').onclick = () => this.saveSettings();
+                document.getElementById('back-to-menu-btn').onclick = () => this.showScreen('main-menu');
+                document.getElementById('back-from-rules').onclick = () => this.showScreen('main-menu');
+                
+                // Игровой экран
+                document.getElementById('next-phase-btn').onclick = () => this.nextPhase();
+                document.getElementById('save-game-btn').onclick = () => this.saveGame();
+                document.getElementById('menu-from-game-btn').onclick = () => this.showScreen('main-menu');
+                
+                // Финальный экран
+                document.getElementById('new-game-final').onclick = () => this.startNewGame();
+                document.getElementById('export-pdf').onclick = () => alert('📄 Функция экспорта в разработке');
+                
+                // Проверяем сохранение
+                if (!localStorage.getItem('familyBudgetSave')) {
+                    document.getElementById('continue-game-btn').style.display = 'none';
+                }
+            }
+
+            showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+            }
+
+            startNewGame() {
+                this.player = JSON.parse(JSON.stringify(INITIAL_PLAYER));
+                this.currentRound = 1;
+                this.currentPhase = 'income';
+                
+                document.getElementById('max-rounds').textContent = `/${this.settings.roundsCount}`;
+                
+                this.updateUI();
+                this.updateBudgetTable();
+                this.updatePhase('income');
+                
+                this.showScreen('game-screen');
+            }
+
+            updateUI() {
+                document.getElementById('stat-money').textContent = `${Math.round(this.player.money).toLocaleString()} ₸`;
+                document.getElementById('stat-savings').textContent = `${Math.round(this.player.savings).toLocaleString()} ₸`;
+                document.getElementById('stat-investments').textContent = `${Math.round(this.player.investments).toLocaleString()} ₸`;
+                document.getElementById('stat-debts').textContent = `${Math.round(this.player.debts).toLocaleString()} ₸`;
+                document.getElementById('net-worth').textContent = `${Math.round(this.calculateNetWorth()).toLocaleString()} ₸`;
+                document.getElementById('current-round').textContent = this.currentRound;
+            }
+
+            calculateNetWorth() {
+                return this.player.money + this.player.savings + this.player.investments - this.player.debts;
+            }
+
+            updateBudgetTable() {
+                const container = document.getElementById('budget-categories');
+                let html = '';
+                let totalExpenses = 0;
+                
+                const categories = [
+                    { key: 'housing', name: '🏠 Жильё', value: this.player.expenses.housing },
+                    { key: 'food', name: '🍎 Еда', value: this.player.expenses.food },
+                    { key: 'transport', name: '🚗 Транспорт', value: this.player.expenses.transport },
+                    { key: 'utilities', name: '💡 Коммунальные', value: this.player.expenses.utilities },
+                    { key: 'education', name: '📚 Образование', value: this.player.expenses.education },
+                    { key: 'healthcare', name: '⚕️ Медицина', value: this.player.expenses.healthcare },
+                    { key: 'entertainment', name: '🎮 Развлечения', value: this.player.expenses.entertainment },
+                    { key: 'savings', name: '💰 Сбережения', value: this.player.expenses.savings },
+                    { key: 'debtPayment', name: '💳 Погашение долгов', value: this.player.expenses.debtPayment }
+                ];
+                
+                categories.forEach(cat => {
+                    totalExpenses += cat.value;
+                    html += `
+                        <div class="budget-row">
+                            <span>${cat.name}</span>
+                            <span>${cat.value.toLocaleString()} ₸</span>
+                            <input type="range" 
+                                   min="${cat.key === 'debtPayment' ? 0 : 200}"
+                                   max="${cat.key === 'housing' ? 3500 : cat.key === 'food' ? 2500 : 1500}"
+                                   value="${cat.value}"
+                                   step="100"
+                                   onchange="game.adjustExpense('${cat.key}', this.value)">
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                document.getElementById('total-income').textContent = `${this.player.income.toLocaleString()} ₸`;
+                document.getElementById('total-expenses').textContent = `${totalExpenses.toLocaleString()} ₸`;
+                document.getElementById('balance').textContent = `${(this.player.income - totalExpenses).toLocaleString()} ₸`;
+            }
+
+            adjustExpense(category, value) {
+                this.player.expenses[category] = parseInt(value);
+                this.updateBudgetTable();
+            }
+
+            updatePhase(phase) {
+                this.currentPhase = phase;
+                
+                // Обновляем индикаторы
+                document.querySelectorAll('.phase').forEach(el => el.classList.remove('active'));
+                document.getElementById(`phase-${phase}`).classList.add('active');
+                
+                // Обновляем контент
+                const content = document.getElementById('phase-content');
+                
+                switch(phase) {
+                    case 'income':
+                        content.innerHTML = '<h4>💰 Доходы</h4><p>Основной доход: ' + this.player.income.toLocaleString() + ' ₸</p>';
+                        break;
+                    case 'expenses':
+                        content.innerHTML = '<h4>📉 Расходы</h4><p>Настройте бюджет выше и нажмите "Следующая фаза"</p>';
+                        break;
+                    case 'event':
+                        content.innerHTML = '<h4>🎲 Событие</h4><p>Смотрите карточку события справа</p>';
+                        this.drawEvent();
+                        break;
+                    case 'decision':
+                        content.innerHTML = '<h4>🤔 Решение</h4>' +
+                            '<div style="display: flex; gap: 0.5rem; margin-top: 1rem;">' +
+                            '<button class="btn btn-outline" onclick="game.transferToSavings()">🏦 В сбережения</button>' +
+                            '<button class="btn btn-outline" onclick="game.showInvestModal()">📈 Инвестировать</button>' +
+                            '<button class="btn btn-outline" onclick="game.takeLoan()">💳 Кредит</button>' +
+                            '<button class="btn btn-outline" onclick="game.payDebt()">📉 Погасить долг</button>' +
+                            '</div>';
+                        break;
+                    case 'result':
+                        const netWorth = this.calculateNetWorth();
+                        content.innerHTML = '<h4>📊 Итог раунда</h4>' +
+                            '<p>Чистая стоимость: ' + netWorth.toLocaleString() + ' ₸</p>';
+                        break;
+                }
+            }
+
+            nextPhase() {
+                const phases = ['income', 'expenses', 'event', 'decision', 'result'];
+                const currentIndex = phases.indexOf(this.currentPhase);
+                
+                if (currentIndex < phases.length - 1) {
+                    this.updatePhase(phases[currentIndex + 1]);
+                } else {
+                    this.endRound();
+                }
+            }
+
+            drawEvent() {
+                if (Math.random() < 0.7) {
+                    const randomIndex = Math.floor(Math.random() * EVENT_DECK.length);
+                    this.currentEvent = { ...EVENT_DECK[randomIndex] };
+                    
+                    document.getElementById('event-title').textContent = this.currentEvent.text;
+                    document.getElementById('event-description').textContent = this.currentEvent.description;
+                    
+                    const valueEl = document.getElementById('event-value');
+                    valueEl.style.display = 'block';
+                    valueEl.className = `event-value ${this.currentEvent.value > 0 ? 'positive' : 'negative'}`;
+                    valueEl.textContent = `${this.currentEvent.value > 0 ? '+' : ''}${this.currentEvent.value.toLocaleString()} ₸`;
+                    
+                    if (this.currentEvent.options) {
+                        document.getElementById('event-actions').innerHTML = `
+                            <button class="btn btn-primary" onclick="game.handleInvestment()">💰 Инвестировать</button>
+                            <button class="btn btn-outline" onclick="game.skipEvent()">Пропустить</button>
+                        `;
+                    } else {
+                        document.getElementById('event-actions').innerHTML = `
+                            <button class="btn btn-primary" onclick="game.acceptEvent()">Применить</button>
+                        `;
+                    }
+                } else {
+                    document.getElementById('event-card').style.opacity = '0.5';
+                    document.getElementById('event-title').textContent = 'Нет событий';
+                    document.getElementById('event-description').textContent = 'В этом месяце всё спокойно';
+                    document.getElementById('event-value').style.display = 'none';
+                    document.getElementById('event-actions').innerHTML = '';
+                }
+            }
+
+            acceptEvent() {
+                if (!this.currentEvent) return;
+                
+                if (this.currentEvent.type === 'crisis') {
+                    this.player.income *= (1 + this.currentEvent.value);
+                } else if (this.currentEvent.value) {
+                    this.player.money += this.currentEvent.value;
+                    if (this.player.money < 0) this.autoLoan();
+                }
+                
+                this.currentEvent = null;
+                this.updateUI();
+                this.updateBudgetTable();
+            }
+
+            skipEvent() {
+                this.currentEvent = null;
+                document.getElementById('event-card').style.opacity = '1';
+            }
+
+            autoLoan() {
+                const loanAmount = -this.player.money + 5000;
+                this.player.money += loanAmount;
+                this.player.debts += loanAmount * 1.15;
+                this.player.expenses.debtPayment = this.player.debts * 0.15;
+                alert(`💳 Автокредит: +${Math.round(loanAmount).toLocaleString()} ₸`);
+            }
+
+            transferToSavings() {
+                const amount = Math.min(this.player.money, 3000);
+                if (amount > 0) {
+                    this.player.money -= amount;
+                    this.player.savings += amount;
+                    this.updateUI();
+                    alert(`🏦 Переведено в сбережения: ${amount.toLocaleString()} ₸`);
+                }
+            }
+
+            showInvestModal() {
+                if (this.player.money < 5000) {
+                    alert('❌ Недостаточно средств! Нужно минимум 5 000 ₸');
+                    return;
+                }
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.id = 'invest-modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <h3>📈 Выберите инструмент</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0;">
+                            <button class="btn btn-outline" onclick="game.invest(5000, 0.08, 0.3)">📊 Акции (8% / риск 30%)</button>
+                            <button class="btn btn-outline" onclick="game.invest(5000, 0.04, 0.05)">📉 Облигации (4% / риск 5%)</button>
+                        </div>
+                        <button class="btn btn-secondary" onclick="this.parentElement.parentElement.remove()">Отмена</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            invest(amount, rate, risk) {
+                if (this.player.money < amount) {
+                    alert('❌ Недостаточно средств');
+                    return;
+                }
+                
+                this.player.money -= amount;
+                this.player.investments += amount;
+                
+                document.getElementById('invest-modal')?.remove();
+                alert(`✅ Инвестировано: ${amount.toLocaleString()} ₸`);
+                this.updateUI();
+            }
+
+            takeLoan() {
+                const amount = 10000;
+                this.player.money += amount;
+                this.player.debts += amount * 1.15;
+                this.player.expenses.debtPayment = this.player.debts * 0.15;
+                this.updateUI();
+                this.updateBudgetTable();
+                alert(`💳 Кредит оформлен: ${amount.toLocaleString()} ₸`);
+            }
+
+            payDebt() {
+                if (this.player.debts <= 0) {
+                    alert('✅ У вас нет долгов!');
+                    return;
+                }
+                
+                const maxPayment = Math.min(this.player.money, this.player.debts);
+                if (maxPayment > 0) {
+                    this.player.money -= maxPayment;
+                    this.player.debts -= maxPayment;
+                    this.player.expenses.debtPayment = this.player.debts * 0.15;
+                    this.updateUI();
+                    this.updateBudgetTable();
+                    alert(`✅ Долг погашен: ${maxPayment.toLocaleString()} ₸`);
+                }
+            }
+
+            handleInvestment() {
+                if (this.currentEvent && this.currentEvent.value < 0) {
+                    const amount = Math.abs(this.currentEvent.value);
+                    this.invest(amount, 0.08, 0.3);
+                    this.currentEvent = null;
+                    this.skipEvent();
+                }
+            }
+
+            endRound() {
+                if (this.currentRound >= this.settings.roundsCount) {
+                    this.showFinalScreen();
+                } else {
+                    this.currentRound++;
+                    this.updatePhase('income');
+                    this.updateUI();
+                    this.updateBudgetTable();
+                }
+            }
+
+            showFinalScreen() {
+                const netWorth = this.calculateNetWorth();
+                const goalsCompleted = Object.values(this.player.goals).filter(g => g.completed).length;
+                
+                document.getElementById('final-networth').textContent = `${Math.round(netWorth).toLocaleString()} ₸`;
+                document.getElementById('final-goals').textContent = `${goalsCompleted}/4`;
+                
+                let rating = 'B';
+                if (netWorth > 50000) rating = '🟢 A';
+                else if (netWorth > 20000) rating = '🟡 B';
+                else rating = '🔴 C';
+                document.getElementById('final-rating').textContent = rating;
+                
+                this.showScreen('final-screen');
+            }
+
+            saveSettings() {
+                this.settings = {
+                    playersCount: parseInt(document.getElementById('players-count').value),
+                    roundsCount: parseInt(document.getElementById('rounds-count').value),
+                    difficulty: document.getElementById('difficulty-level').value
+                };
+                this.showScreen('main-menu');
+            }
+
+            saveGame() {
+                const gameState = {
+                    player: this.player,
+                    currentRound: this.currentRound,
+                    settings: this.settings
+                };
+                localStorage.setItem('familyBudgetSave', JSON.stringify(gameState));
+                alert('💾 Игра сохранена!');
+            }
+
+            loadGame() {
+                const saved = localStorage.getItem('familyBudgetSave');
+                if (saved) {
+                    const state = JSON.parse(saved);
+                    this.player = state.player;
+                    this.currentRound = state.currentRound;
+                    this.settings = state.settings;
+                    
+                    document.getElementById('max-rounds').textContent = `/${this.settings.roundsCount}`;
+                    this.updateUI();
+                    this.updateBudgetTable();
+                    this.updatePhase('income');
+                    this.showScreen('game-screen');
+                }
+            }
+        }
+
+        // ========== ЗАПУСК ==========
+        let game;
+        window.onload = function() {
+            game = new FamilyBudgetGame();
+            window.game = game; // Делаем глобальным для onclick
+        };
+    </script>
 </body>
 </html>
